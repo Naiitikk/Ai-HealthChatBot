@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>YourHealth AI</title>
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#141414;
+      --accent:#ff3b30; /* red */
+      --muted:#bdbdbd;
+      --glass: rgba(255,255,255,0.03);
+    }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(circle at 10% 10%, #0f0f0f, var(--bg));
+      color: #fff;
+      -webkit-font-smoothing:antialiased;
+    }
+    .wrap{max-width:920px;margin:32px auto;padding:24px;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,59,48,0.06);}
+    header{display:flex;align-items:center;gap:16px;}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--card),#0d0d0d);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:20px;border:1px solid rgba(255,59,48,0.08);}
+    h1{margin:0;font-size:20px;color:var(--accent);}
+    .topright{margin-left:auto;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px;}
+    /* left column */
+    .profileBox{background:var(--card);padding:14px;border-radius:10px;border:1px solid rgba(255,59,48,0.04);}
+    .avatar{width:88px;height:88px;border-radius:12px;background:#111;border:2px solid rgba(255,59,48,0.12);display:block;margin:0 auto 12px auto;object-fit:cover;}
+    .userName{text-align:center;color:#fff;font-weight:700;margin-bottom:6px;}
+    .userHandle{text-align:center;color:var(--muted);font-size:13px;margin-bottom:10px;}
+    .smallBtn{display:block;width:100%;padding:10px;border-radius:8px;border:none;background:transparent;color:var(--accent);cursor:pointer;text-align:center;border:1px solid rgba(255,59,48,0.08);margin-top:8px}
+    /* right column */
+    .chatBox{background:var(--card);padding:16px;border-radius:10px;border:1px solid rgba(255,59,48,0.04);min-height:360px;display:flex;flex-direction:column;}
+    .messages{flex:1;overflow:auto;padding-right:6px;}
+    .msg{margin-bottom:12px;max-width:80%;padding:12px;border-radius:10px;line-height:1.4;}
+    .msg.user{margin-left:auto;background:linear-gradient(180deg, rgba(255,59,48,0.14), rgba(255,59,48,0.06));color:#fff;border:1px solid rgba(255,59,48,0.12);}
+    .msg.bot{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));color:#ddd;border:1px solid rgba(255,255,255,0.02);}
+    .inputRow{display:flex;gap:8px;margin-top:12px}
+    .textInput{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:#fff}
+    .sendBtn{padding:12px 16px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+    .tips{display:flex;flex-direction:column;gap:10px}
+    .tipCard{background:#0f0f0f;padding:12px;border-radius:8px;border:1px solid rgba(255,59,48,0.04);}
+    .tipTitle{color:var(--accent);font-weight:700;margin-bottom:6px}
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+    @media (max-width:820px){.grid{grid-template-columns:1fr;}.profileBox{order:2} .chatBox{order:1}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="logo">YH</div>
+        <div>
+          <h1>YourHealth AI</h1>
+          <div style="color:var(--muted);font-size:13px">Public health awareness assistant</div>
+        </div>
+        <div class="topright">Dark • Red theme</div>
+      </header>
+
+      <div class="grid">
+        <div class="profileBox">
+          <img class="avatar" src="{{ profile.profile_pic if profile and profile.profile_pic else '/static/profile_pics/default-avatar.png' }}" alt="avatar">
+          {% if profile %}
+            <div class="userName">{{ profile.name }}</div>
+            <div class="userHandle">@{{ profile.username }}</div>
+            <form method="post" style="display:grid;gap:8px">
+              <input type="hidden" name="message" value="">
+              <button class="smallBtn" formaction="/">Clear Profile</button>
+            </form>
+          {% else %}
+            <div style="text-align:center;color:var(--muted);">Create a temporary profile</div>
+            <form method="post" enctype="multipart/form-data" style="display:grid;gap:8px;margin-top:10px">
+              <input type="text" name="username" placeholder="username" required style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#0d0d0d;color:#fff">
+              <input type="text" name="name" placeholder="Full name" required style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#0d0d0d;color:#fff">
+              <input type="file" name="profile_pic" accept="image/*">
+              <input type="hidden" name="message" value="">
+              <button class="smallBtn" type="submit">Create Profile</button>
+            </form>
+          {% endif %}
+
+          <div style="margin-top:14px;color:var(--muted);font-size:13px">Quick tips</div>
+          <div style="margin-top:8px" class="tips">
+            <div class="tipCard"><div class="tipTitle">Daily Thought</div><div>{{ daily_thought }}</div></div>
+            <div class="tipCard"><div class="tipTitle">Meal Suggestion</div><div>{{ meal_suggestion }}</div></div>
+            <div class="tipCard"><div class="tipTitle">Wellness</div><div>{{ wellness_suggestion }}</div></div>
+          </div>
+        </div>
+
+        <div class="chatBox">
+          <div style="font-weight:700;margin-bottom:10px;color:var(--accent)">Chat</div>
+          <div class="messages">
+            {% if reply %}
+              <div class="msg bot">{{ reply }}</div>
+            {% else %}
+              <div style="color:var(--muted);">Ask about symptoms, prevention, healthy habits, or meal & yoga suggestions.</div>
+            {% endif %}
+          </div>
+
+          <form method="post" enctype="multipart/form-data" class="inputRow" style="margin-top:auto">
+            <input class="textInput" name="message" placeholder="Type your question... (e.g., symptoms of cold)" required>
+            {% if not profile %}
+              <!-- keep username/name fields when creating profile -->
+              <input type="hidden" name="username" value="">
+              <input type="hidden" name="name" value="">
+            {% endif %}
+            <button class="sendBtn" type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+
+      <footer>Built for public health awareness — YourHealth AI</footer>
+    </div>
+  </div>
+</body>
+</html>
